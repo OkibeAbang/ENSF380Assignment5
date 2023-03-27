@@ -267,14 +267,16 @@ public class NewFeatureTest {
             success = (success && vp.licenceIsRegisteredForDate(licence1, tmp));
             tmp = tmp.plusDays(3); 
         }
+
         
         // Check that earlier reservations were stored as well
         success = (success && vp.licenceIsRegisteredForDate(licence1, today));
+       
         success = (success && vp.licenceIsRegisteredForDate(licence2));
         success = (success && vp.licenceIsRegisteredForDate(licence1, date1));
         success = (success && vp.licenceIsRegisteredForDate(licence2, date2));
-
         assertTrue("VisitorParking addVisitorReservation() didn't correctly add two licences (one requiring standardization) across multiple dates", success);
+       
     }
 
 
@@ -396,6 +398,7 @@ public class NewFeatureTest {
 
         // Check that there is no reservation after the period ends
         ArrayList <String> result = vp.getLicencesRegisteredForDate(afterDate);
+        System.out.println(result);
         assertTrue("VisitorParking registers reservations for more than date plus 2 days", result.isEmpty());
 
         // Check that there are no reservations before the period starts
@@ -407,6 +410,7 @@ public class NewFeatureTest {
         boolean successDay2 = vp.licenceIsRegisteredForDate(licence, registeredDate.plusDays(1));
         boolean successDay3 = vp.licenceIsRegisteredForDate(licence, registeredDate.plusDays(2));
         assertTrue("VisitorParking does not register reservation for three days", (successDay1 && successDay2 && successDay3));
+
     }
 
     /*
