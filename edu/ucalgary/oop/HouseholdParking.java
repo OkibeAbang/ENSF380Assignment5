@@ -12,7 +12,7 @@ public class HouseholdParking extends CalgaryProperty {
     // Each residental property is allowed one street parking permit
     private String residentLicence = "";
     private int maxLicences = 3;
-
+    private VisitorParking vp = new VisitorParking();
     public HouseholdParking(int taxRollNumber, String zoning, String streetName, int buildingNumber, String postCode, String buildingAnnex) throws IllegalArgumentException {
         super(taxRollNumber,zoning,streetName,buildingNumber,postCode,buildingAnnex);
     }
@@ -93,6 +93,33 @@ public class HouseholdParking extends CalgaryProperty {
     String result = this.residentLicence;   
     return result;
     }
+    public VisitorParking getVisitors() {
+        return this.vp;
+    }
 
+    public void addVisitorReservation(String licence){
+        vp.addVisitorReservation(licence);
+    }
+    public void addVisitorReservation(String licence, LocalDate date) throws IllegalArgumentException{
+        vp.addVisitorReservation(licence, date);
+    }
+    public ArrayList<String> getLicencesRegisteredForDate(LocalDate date){
+        return vp.getLicencesRegisteredForDate(date);
+    }
+    public ArrayList<String> getLicencesRegisteredForDate(){
+        return vp.getLicencesRegisteredForDate();
+    }
+    public boolean licenceIsRegisteredForDate(String licence, LocalDate date){
+        return vp.licenceIsRegisteredForDate(licence, date);
+    }
+    public boolean licenceIsRegisteredForDate(String licence){
+        return vp.licenceIsRegisteredForDate(licence);
+    }
+    public String getAllDaysLicenceIsRegistered(String licence){
+        return vp.getAllDaysLicenceIsRegistered(licence).toString();
+    }
+    public String getStartDaysLicenceIsRegistered(String licence){
+        return vp.getStartDaysLicenceIsRegistered(licence).toString();
+    }
 }
 

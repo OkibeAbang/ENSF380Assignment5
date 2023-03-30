@@ -24,23 +24,25 @@ public class VisitorParking {
         else{
             TreeSet<LocalDate> dates = new TreeSet<LocalDate>();
             dates.add(date);
-            reservations.put(validLicence, dates);
+            TreeSet<LocalDate> res = (TreeSet<LocalDate>)dates.descendingSet();
+            reservations.put(validLicence, res);
         }
     }
-    public VisitorParking(String license) throws IllegalArgumentException{
+    public VisitorParking(String licence) throws IllegalArgumentException{
         String validLicence;
         try{
-            validLicence = Parking.standardizeAndValidateLicence(license);
+            validLicence = Parking.standardizeAndValidateLicence(licence);
         }
         catch(IllegalArgumentException e){
             throw new IllegalArgumentException("Invalid licence plate");
         }
         TreeSet<LocalDate> dates = new TreeSet<LocalDate>();
         dates.add(LocalDate.now());
-        reservations.put(validLicence, dates);
+        TreeSet<LocalDate> res = (TreeSet<LocalDate>)dates.descendingSet();
+        reservations.put(validLicence, res);
     }
     public void addVisitorReservation(String licence, LocalDate date) throws IllegalArgumentException{
-        String validLicence = "";
+        String validLicence;
         int numRegistered = 0;
         try{
             validLicence = Parking.standardizeAndValidateLicence(licence);
@@ -62,6 +64,7 @@ public class VisitorParking {
                     throw new IllegalArgumentException("Date cannot be within 3 days of current date.");
                 }
             }
+            // Add date to existing licence
         }
         // Counts the number of reservations for the same date
         for(TreeSet<LocalDate> i : reservations.values()){ //Loop through HashMap
@@ -74,9 +77,15 @@ public class VisitorParking {
             }
         }
         if(numRegistered < 2){
-            TreeSet<LocalDate> dates = new TreeSet<LocalDate>();
-            dates.add(date);
-            reservations.put(validLicence, dates);
+            if(reservations.get(validLicence) != null){
+                reservations.get(validLicence).add(date);
+            }
+            else{
+                TreeSet<LocalDate> dates = new TreeSet<LocalDate>();
+                dates.add(date);
+                TreeSet<LocalDate> res = (TreeSet<LocalDate>)dates.descendingSet();
+                reservations.put(validLicence, res);
+            }
         }
         else{
             throw new IllegalArgumentException("Max reservation limit reached for this date");
@@ -88,7 +97,7 @@ public class VisitorParking {
         
     }
     public void addVisitorReservation(String licence) throws IllegalArgumentException{
-        String validLicence = "";
+        String validLicence;
         int numRegistered = 0;
         try{
             validLicence = Parking.standardizeAndValidateLicence(licence);
@@ -110,26 +119,22 @@ public class VisitorParking {
             Iterator<LocalDate> iterate = i.iterator(); //Loop through TreeSet
             while(iterate.hasNext()){
                 LocalDate checkDate = iterate.next();
-                if(LocalDate.now().compareTo(checkDate.plusDays(3)) < 0){
-                    if(LocalDate.now().compareTo(checkDate) >= 0){
+                if(LocalDate.now().compareTo(checkDate.plusDays(3)) < 0 && LocalDate.now().compareTo(checkDate) >= 0){
                         numRegistered++;
-                    }
                 }
             }
         }
-        // if(numRegistered > 0){
-        //     for(String i : reservations.keySet()){
-        //         if(LocalDate.now().compareTo(reservations.get(i).plusDays(3)) <= 0 && LocalDate.now().compareTo(reservations.get(i)) >= 0){
-        //             if(i.compareTo(validLicence) == 0){
-        //                 throw new IllegalArgumentException("License has already been registered for this date");
-        //             }
-        //         }
-        //     }
-        // }
         if(numRegistered < 2){
-            TreeSet<LocalDate> dates = new TreeSet<LocalDate>();
-            dates.add(LocalDate.now());
-            reservations.put(validLicence, dates);
+            if(reservations.get(validLicence) != null){
+                reservations.get(validLicence).add(LocalDate.now());
+            }
+            else{
+                TreeSet<LocalDate> dates = new TreeSet<LocalDate>();
+                dates.add(LocalDate.now());
+                TreeSet<LocalDate> res = (TreeSet<LocalDate>)dates.descendingSet();
+
+                reservations.put(validLicence, res);
+            }
         }
         else{
             throw new IllegalArgumentException("Max reservation limit reached for this date");
@@ -138,24 +143,34 @@ public class VisitorParking {
     
     public boolean licenceIsRegisteredForDate(String licence, LocalDate date){
         boolean isRegistered = false;
-        
-        // System.out.println(reservations.get(licence));
-        if(reservations.get(licence) != null){
-            Iterator<LocalDate> iterate = reservations.get(licence).iterator();
-            while(iterate.hasNext()){
-                LocalDate checkDate = iterate.next();
-                if(date.compareTo(checkDate.plusDays(3)) < 0 && date.compareTo(checkDate) >= 0){
-                    isRegistered = true;
-                }
-            }    
+        String validLicence;
+        try{
+            validLicence = Parking.standardizeAndValidateLicence(licence);
         }
+        catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Invalid licence plate");
+        }
+        // System.out.println(reservations.get(validLicence));
+        Iterator<LocalDate> iterate = reservations.get(validLicence).iterator();
+        while(iterate.hasNext()){
+            LocalDate checkDate = iterate.next();
+            if(date.compareTo(checkDate.plusDays(3)) < 0 && date.compareTo(checkDate) >= 0){
+                isRegistered = true;
+            }
+        }    
         
         return isRegistered;
     }
     public boolean licenceIsRegisteredForDate(String licence){
         boolean isRegistered = false;
-        
-        Iterator<LocalDate> iterate = reservations.get(licence).iterator();
+        String validLicence;
+        try{
+            validLicence = Parking.standardizeAndValidateLicence(licence);
+        }
+        catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Invalid licence plate");
+        }
+        Iterator<LocalDate> iterate = reservations.get(validLicence).iterator();
         while(iterate.hasNext()){
             LocalDate checkDate = iterate.next();
             if(LocalDate.now().compareTo(checkDate.plusDays(3)) < 0 && LocalDate.now().compareTo(checkDate) >= 0){
@@ -184,5 +199,47 @@ public class VisitorParking {
             }
         }
         return licences;
+    }
+    public ArrayList<LocalDate> getStartDaysLicenceIsRegistered(String licence){
+        ArrayList<LocalDate> dates = new ArrayList<LocalDate>();
+        String validLicence;
+        try{
+            validLicence = Parking.standardizeAndValidateLicence(licence);
+        }
+        catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Invalid licence plate");
+        }
+        if(reservations.get(validLicence) != null){
+            Iterator<LocalDate> iterate = reservations.get(validLicence).iterator();
+            while(iterate.hasNext()){
+                dates.add(iterate.next());
+            }
+        }
+        dates.sort(Comparator.naturalOrder());
+        return dates;
+    }
+    public ArrayList<LocalDate> getAllDaysLicenceIsRegistered(String licence){
+        ArrayList<LocalDate> dates = new ArrayList<LocalDate>();
+        String validLicence;
+        try{
+            validLicence = Parking.standardizeAndValidateLicence(licence);
+        }
+        catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Invalid licence plate");
+        }
+        if(reservations.get(validLicence) != null){
+            Iterator<LocalDate> iterate = reservations.get(validLicence).iterator();
+            while(iterate.hasNext()){
+                LocalDate checkDate = iterate.next();
+                dates.add(checkDate);
+                dates.add(checkDate.plusDays(1));
+                dates.add(checkDate.plusDays(2));
+            }
+        }
+        dates.sort(Comparator.naturalOrder());
+        return dates;
+    }
+    public HashMap<String, TreeSet<LocalDate>> getParkingRecord(){
+        return reservations;
     }
 }
